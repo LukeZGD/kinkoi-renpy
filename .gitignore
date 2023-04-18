@@ -1,0 +1,11 @@
+*.mp4
+*.rpyb
+*.rpyc
+*.rpymc
+*.webm
+cache/
+Kinkoi_*
+saves/
+00_prologue*.rpy
+defs*.rpy
+main_menu.png
