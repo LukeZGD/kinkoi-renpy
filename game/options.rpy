@@ -56,7 +56,12 @@ define config.has_voice = True
 
 # define config.sample_sound = "sample-sound.ogg"
 # define config.sample_voice = "sample-voice.ogg"
+init python:
+    renpy.music.register_channel("voice2", "voice", False)
 
+define config.default_music_volume = 0.5
+define config.default_sfx_volume = 0.7
+define config.default_voice_volume = 0.7
 
 ## Uncomment the following line to set an audio file that will be played while
 ## the player is at the main menu. This file will continue playing into the

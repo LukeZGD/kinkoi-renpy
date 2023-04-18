@@ -22,7 +22,6 @@ spriteb = [{'b':'','f':'','char':'','chart':'','x':0.5,'y':0.5,'order':1},
            {'b':'','f':'','char':'','chart':'','x':0.5,'y':0.5,'order':1},
            ]
 
-
 voicefilelist = "voicefilelist.txt"
 bgmfilelist = "bgmfilelist.txt"
 sfxfilelist = "sfxfilelist.txt"
@@ -248,7 +247,7 @@ with open(inputFile, 'r+') as filedata:
             #    f.write(voicefile+"\n")
 
             with open(outputFile, 'a') as f:
-                f.write("    voice \""+voicefile+"\"\n")
+                f.write("    play voice2 \""+voicefile+"\"\n")
 
         # sound effects
         elif i.startswith('se'):
