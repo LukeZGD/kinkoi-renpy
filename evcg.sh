@@ -1,25 +1,27 @@
 #!/bin/bash
-
-#mkdir output output2
+set -x
 
 pushd Kinkoi_extract/ui
 magick _menu_bg.06.png _menu_bg.05.png _menu_bg.04.png _menu_bg.03.png _menu_bg.02.png _menu_bg.01.png _menu_character.01.png _menu_character.03.png _menu_character.04.png _menu_character.02.webp \( -page +0+915 _menu_btn_filter.png \) \( -page +20+720 en/_menu_title_logo.png \) -layers flatten ../../game/gui/main_menu.png
 popd
 
 magic() {
-    base=ev_0$1_0$2
-    diff=ev_0$1_0$3
-    if [[ -e $2.webp ]]; then
+    base=ev_$1_0$2
+    diff=ev_$1_0$3
+    if [[ -e $diff.webp ]]; then
         return
     fi
     echo "magic $1 $2"
-    magick $1.webp diff/$2.webp -layers flatten diff2/$2.webp
+    magick $base.webp diff/$diff.webp -layers flatten $diff.webp
     #rm diff/$2.webp
 }
 
 mkdir -p Kinkoi_processed 2>/dev/null
 if [[ ! -d Kinkoi_processed/evcg ]]; then
-    cp Kinkoi_data/evcg Kinkoi_processed
+    cp -r Kinkoi_extract/evcg Kinkoi_processed
+fi
+if [[ ! -d Kinkoi_processed/evcg/diff ]]; then
+    cp -r Kinkoi_extract/evcg/diff Kinkoi_processed/evcg
 fi
 
 pushd Kinkoi_processed/evcg
@@ -216,11 +218,11 @@ magic sy05 101 108
 magic sy05 101 109
 
 magic sy06 102 101
-magic sy06 101 103
+magic sy06 102 103
 
 # --- loveriche
-magic yy01 103 101
-magic yy01 103 102
+magic yy03 103 101
+magic yy03 103 102
 
 rm -r diff
 popd

@@ -23,16 +23,17 @@ done
 
 echo "Extracting voice"
 #wine NekoNyanDatTool.exe --input=Kinkoi_Data/voice.dat --output=voice/ --unpack --format kinkoi_pc
-python extractor/extract.py Kinkoi_Data/voice.dat Kinkoi_voice
+python extractor/extract.py Kinkoi_Data/voice.dat Kinkoi_extract/voice
 
 # UABE helped a bit in figuring out the video extraction: https://github.com/SeriousCache/UABE
 
+mkdir Kinkoi_extract/video
 echo "Extracting video"
-xxd -s +4747 -l 6820319 -c 10 -p Kinkoi_Data/video | xxd -r -p - > sagaplanets.webm
+xxd -s +4747 -l 6820319 -c 10 -p Kinkoi_Data/video | xxd -r -p - > Kinkoi_extract/video/sagaplanets.webm
 
 echo "Extracting video_en"
-xxd -s +5053 -l 75473080 -c 10 -p Kinkoi_Data/video_en | xxd -r -p - > op_en.mp4
-xxd -s +75478134 -l 138390743 -c 10 -p Kinkoi_Data/video_en | xxd -r -p - > ed_en.mp4
+xxd -s +5053 -l 75473080 -c 10 -p Kinkoi_Data/video_en | xxd -r -p - > Kinkoi_extract/video/op_en.mp4
+xxd -s +75478134 -l 138390743 -c 10 -p Kinkoi_Data/video_en | xxd -r -p - > Kinkoi_extract/video/ed_en.mp4
 
 #rm game/images/* game/audio/*
 #mv Kinkoi_extract/bg Kinkoi_extract/effects Kinkoi_extract/evcg Kinkoi_extract/sprite game/images

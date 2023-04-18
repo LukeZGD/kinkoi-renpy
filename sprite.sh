@@ -48,7 +48,7 @@ sprite() {
 
 mkdir -p Kinkoi_processed 2>/dev/null
 if [[ ! -d Kinkoi_processed/sprite ]]; then
-    cp Kinkoi_data/sprite Kinkoi_processed
+    cp -r Kinkoi_extract/sprite Kinkoi_processed
 fi
 
 pushd Kinkoi_processed/sprite
@@ -66,4 +66,5 @@ for i in $(ls *.webp); do
     sprite $i
 done
 
+mv defs_sprite.rpy ../..
 popd
