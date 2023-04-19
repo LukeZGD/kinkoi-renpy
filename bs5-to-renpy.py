@@ -13,13 +13,14 @@ else:
 debug = 1
 scene = ''
 scenetoggle = 1
+res = [1920, 1080]
 inputname = os.path.splitext(os.path.basename(inputFile))[0]
 outputFile = inputname+".rpy"
-spriteb = [{'b':'','f':'','char':'','chart':'','x':0.5,'y':0.5,'order':1},
-           {'b':'','f':'','char':'','chart':'','x':0.5,'y':0.5,'order':1},
-           {'b':'','f':'','char':'','chart':'','x':0.5,'y':0.5,'order':1},
-           {'b':'','f':'','char':'','chart':'','x':0.5,'y':0.5,'order':1},
-           {'b':'','f':'','char':'','chart':'','x':0.5,'y':0.5,'order':1},
+sprite_q = [{'b':'','f':'','char':'','char_next':'','x':0.5,'y':0.5,'order':1},
+           {'b':'','f':'','char':'','char_next':'','x':0.5,'y':0.5,'order':1},
+           {'b':'','f':'','char':'','char_next':'','x':0.5,'y':0.5,'order':1},
+           {'b':'','f':'','char':'','char_next':'','x':0.5,'y':0.5,'order':1},
+           {'b':'','f':'','char':'','char_next':'','x':0.5,'y':0.5,'order':1},
            ]
 
 voicefilelist = "voicefilelist.txt"
@@ -42,20 +43,25 @@ def scene_conv(scene):
         scene = "white"
     return scene
 
-def sprite_process(sprite, spriteb, sindex):
-    spritea = ''
+def sprite_process(sprite, sprite_q, index, time):
+    sprite_ret = ''
 
-    if sprite[0]:
-        spriteb[index]['b'] = sprite[0].replace('f_','')
+    try:
+        if sprite[1]:
+            sprite_q[index]['f'] = sprite[1].replace('.','_')
+        if sprite[0]:
+            sprite_q[index]['b'] = sprite[0].replace('f_','')
+    except:
+        pass
 
-    spriteb[index]['chart'] = spriteb[index]['b'][4:-9]
-    if (spriteb[index]['char'] != '' and spriteb[index]['chart'] != spriteb[index]['char']):
-        spritea += "    hide "+spriteb[index]['char']+" with Dissolve(0.35)\n"
+    sprite_q[index]['char_next'] = sprite_q[index]['b'][4:-9]
 
-    spriteb[index]['char'] = spriteb[index]['chart']
-    spriteb[index]['f'] = sprite[1].replace('.','_')
-    spritea += "    show "+spriteb[index]['char']+' '+spriteb[index]['b']+' '+spriteb[index]['f']
-    return spritea
+    if (sprite_q[index]['char'] != '' and sprite_q[index]['char_next'] != sprite_q[index]['char']):
+        sprite_ret += "    hide "+sprite_q[(index)]['char']+" with Dissolve("+str(time)+")\n"
+
+    sprite_q[index]['char'] = sprite_q[index]['char_next']
+    sprite_ret += "    show "+sprite_q[index]['char']+' '+sprite_q[index]['b']+' '+sprite_q[index]['f']
+    return sprite_ret
 
 with open(inputFile, 'r+') as filedata:
     # Iterate through the file
@@ -68,10 +74,12 @@ with open(inputFile, 'r+') as filedata:
             newline = i.split()
             bgm = newline[1]
             time = 0
+            print(newline)
 
             for j in newline:
                 if 'TIME:' in j:
-                    newline2 = i.split(':')
+                    newline2 = j.split(':')
+                    print(newline2)
                     time = int(newline2[1])/1000
 
             if 'fadeout' in bgm:
@@ -143,10 +151,8 @@ with open(inputFile, 'r+') as filedata:
             xpan = 0
             ypan = 0
             zoom = 1
-            resx = 1920
-            resy = 1080
-            zoox = resx
-            zooy = resy
+            zoox = res[0]
+            zooy = res[1]
             zoox2 = zoox
             zooy2 = zooy
             easeyes = 0
@@ -193,21 +199,21 @@ with open(inputFile, 'r+') as filedata:
                         newline2 = j.split(':')
                         zoom2 = int(newline2[1])/100
 
-            zoox = resx/zoom
-            zooy = resy/zoom
-            zoox2 = resx/zoom2
-            zooy2 = resy/zoom2
+            zoox = res[0]/zoom
+            zooy = res[1]/zoom
+            zoox2 = res[0]/zoom2
+            zooy2 = res[1]/zoom2
 
             if zoom > 1:
-                xpos = ((resx-(resx/zoom))/2)-xpos
-                ypos = ((resy-(resy/zoom))/2)-ypos
+                xpos = ((res[0]-(res[0]/zoom))/2)-xpos
+                ypos = ((res[1]-(res[1]/zoom))/2)-ypos
 
             if zoom2 > 1:
-                xpan = ((resx-(resx/zoom))/2)-xpan
-                ypan = ((resy-(resy/zoom))/2)-ypan
+                xpan = ((res[0]-(res[0]/zoom))/2)-xpan
+                ypan = ((res[1]-(res[1]/zoom))/2)-ypan
 
             scene += " with Dissolve("+str(time)+"):\n"
-            scene += "        size("+str(resx)+","+str(resy)+") crop ("+str(xpos)+","+str(ypos)+","+str(zoox)+","+str(zooy)+")"
+            scene += "        size("+str(res[0])+","+str(res[1])+") crop ("+str(xpos)+","+str(ypos)+","+str(zoox)+","+str(zooy)+")"
 
             if easeyes == 1:
                 scene += "\n        easein "+str(time2)+" crop ("+str(xpan)+","+str(ypan)+","+str(zoox2)+","+str(zooy2)+")"
@@ -299,7 +305,7 @@ with open(inputFile, 'r+') as filedata:
         # sprites
         elif '.sprite' in i:
             newline = i.split()
-            time = 0
+            time = 0.5
             sprite = ''
             spriteerase = 0
             if i.startswith('.sprite'):
@@ -323,37 +329,34 @@ with open(inputFile, 'r+') as filedata:
                     time = int(newline2[1])/1000
                 elif j.startswith('X:'):
                     newline2 = j.split(':')
-                    spriteb[index]['x'] = newline2[1]
+                    sprite_q[index]['x'] = newline2[1]
                     if newline2[1].lstrip("-").isdigit():
-                        spritd=560
-                        spriteb[index]['x'] = ((spritd/2)+int(newline2[1]))/spritd
+                        spritex = (res[0]/4)+(res[0]/24)
+                        sprite_q[index]['x'] = ((spritex/2)+int(newline2[1]))/spritex
                     else:
-                        spriteb[index]['x'] = 0.5
+                        sprite_q[index]['x'] = 0.5
                 elif j.startswith('Y:'):
                     newline2 = j.split(':')
-                    spriteb[index]['y'] = newline2[1]
+                    sprite_q[index]['y'] = newline2[1]
                     if newline2[1].lstrip("-").isdigit():
-                        spriteb[index]['y'] = int(newline2[1])+100
+                        sprite_q[index]['y'] = int(newline2[1])+100
                     else:
-                        spriteb[index]['y'] = 0.5
+                        sprite_q[index]['y'] = 0.5
                 elif j.startswith('ORDER:'):
                     newline2 = j.split(':')
-                    spriteb[index]['order'] = int(newline2[1])/10
+                    sprite_q[index]['order'] = int(newline2[1])/10
                 elif j.startswith('erase'):
                     spriteerase = 1
 
             if spriteerase == 1:
-                sprite = "    hide "+str(spriteb[index]['char'])+" with Dissolve(0.35)"
-                spriteb[index]['char'] = ''
-
-            elif sprite:
-                sprite = sprite.split('+')
-                sprite = sprite_process(sprite, spriteb, i)
-                sprite += " zorder "+str(spriteb[index]['order'])
-                sprite += " with Dissolve("+str(time)+"):\n        xalign "+str(spriteb[index]['x'])+" yalign 0.5"
+                sprite = "    hide "+str(sprite_q[index]['char'])+" with Dissolve("+str(time)+")"
+                sprite_q[index]['char'] = ''
 
             else:
-                continue
+                sprite = sprite.split('+')
+                sprite = sprite_process(sprite, sprite_q, index, time)
+                sprite += " zorder "+str(sprite_q[index]['order'])
+                sprite += " with Dissolve("+str(time)+"):\n        xalign "+str(sprite_q[index]['x'])+" yalign 0.5"
 
             with open(outputFile, 'a') as f:
                 f.write(sprite+"\n")

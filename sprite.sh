@@ -3,6 +3,10 @@
 trap 'exit' INT TERM EXIT
 
 crop() {
+    if [[ -n $3 ]]; then
+        magick convert ${1}1.webp -crop $2 +repage +adjoin -scene $3 crop/$1%02d.webp
+        return
+    fi
     magick convert ${1}0.webp -crop $2 +repage +adjoin -scene 1 crop/$1%02d.webp
 }
 
@@ -24,21 +28,35 @@ sprite() {
             facey=${props[4]}
             cropx=${props[5]}
             cropy=${props[6]}
+            #echo "${props[0]}"
             continue
         fi
 
-        if [[ ${props[0]} != "${face}0" ]]; then
+        if [[ ${props[0]} != "${face}0" && ${props[0]} != "${face}1" ]]; then
             continue
         fi
 
         i=$(echo $i | tr '.' '_')
 
-        #echo crop/$i
-        #read -s
-        if [[ ! -e crop/$i.webp ]]; then
-            echo "cropping"
-            crop $face ${cropx}x${cropy}
-        fi
+        case $i in
+            "bs3_ak_b"* | "bs3_ma_"* ) scene=25;;&
+            "bs3_ay_"* | "bs3_re_"* ) scene=22;;&
+            "bs3_ak_b"* | "bs3_ay_"* | "bs3_ma_"*  | "bs3_re_"* )
+                if [[ ! -e crop/$i.webp ]]; then
+                    echo "cropping"
+                    crop $face ${cropx}x${cropy}
+                    echo "cropping1"
+                    crop $face ${cropx}x${cropy} $scene
+                fi
+            ;;
+
+            * )
+                if [[ ! -e crop/$i.webp ]]; then
+                    echo "cropping"
+                    crop $face ${cropx}x${cropy}
+                fi
+            ;;
+        esac
 
         imagest="image $char $base $i = im.Composite(($basex,$basey),(0,0),\"images/sprite/$base.webp\",($facex,$facey),\"images/sprite/crop/$i.webp\")"
 

@@ -37,4 +37,7 @@ label start:
 
     call s00_prologue1_Z00
     call s00_prologue1_z01
+    call s00_prologue2_Z00
+    call s00_prologue2_z01
+    call s00_prologue2_z02
     return
