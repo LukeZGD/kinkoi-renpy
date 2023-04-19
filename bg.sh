@@ -2,21 +2,31 @@
 
 printf '' > defs_bg.rpy
 
-for i in $(ls Kinkoi_extract/bg/*.webp); do
-    name=$(basename $i)
-    name=${name%%.*}
-    echo "image bg $name = \"images/bg/$name.webp\"" >> defs_bg.rpy
-done
+bg_process() {
+    dir=$1
+    ext=$2
 
-for i in $(ls Kinkoi_extract/effects/*.png); do
-    name=$(basename $i)
-    name=${name%%.*}
-    echo "image bg $name = \"images/effects/$name.png\"" >> defs_bg.rpy
-done
+    mkdir Kinkoi_processed/$dir
+    if [[ $dir != "evcg" ]]; then
+        cp Kinkoi_extract/$dir/*.$ext Kinkoi_processed/$dir
+        #pushd Kinkoi_processed/$dir
+        #mogrify -resize 50% *.$ext
+        #popd
+    fi
+    if [[ $dir == "ui" ]]; then
+        return
+    fi
+    for i in $(ls Kinkoi_processed/$dir/*.$ext); do
+        name=$(basename $i)
+        name=${name%%.*}
+        echo "image bg $name = \"images/$dir/$name.$ext\"" >> defs_bg.rpy
+    done
+}
 
-
-for i in $(ls Kinkoi_processed/evcg/*.webp); do
-    name=$(basename $i)
-    name=${name%%.*}
-    echo "image bg $name = \"images/evcg/$name.webp\"" >> defs_bg.rpy
-done
+bg_process bg webp
+bg_process effects png
+bg_process effects webp
+bg_process effects2 png
+bg_process effects2 webp
+bg_process evcg webp
+bg_process ui png

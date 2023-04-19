@@ -28,7 +28,19 @@ sprite() {
             facey=${props[4]}
             cropx=${props[5]}
             cropy=${props[6]}
-            #echo "${props[0]}"
+
+            #if [[ ${props[0]} == "$(echo $1 | cut -c -8)"* ]]; then
+            #    imagest="image $char $base $face = im.Composite(($basex,$basey),(0,0),\"images/sprite/$base.webp\",($facex,$facey),[$face])"
+            #    echo "$imagest" >> defs_sprite.rpy
+            #fi
+
+            #basex=$((basex/2))
+            #basey=$((basey/2))
+            #facex=$((facex/2))
+            #facey=$((facey/2))
+
+            #cropx=$((cropx/2))
+            #cropy=$((cropy/2))
             continue
         fi
 
@@ -59,7 +71,6 @@ sprite() {
         esac
 
         imagest="image $char $base $i = im.Composite(($basex,$basey),(0,0),\"images/sprite/$base.webp\",($facex,$facey),\"images/sprite/crop/$i.webp\")"
-
         echo "$imagest" >> defs_sprite.rpy
     done
 }
@@ -84,5 +95,6 @@ for i in $(ls *.webp); do
     sprite $i
 done
 
+#mogrify -resize 50% *.webp crop/*.webp
 mv defs_sprite.rpy ../..
 popd

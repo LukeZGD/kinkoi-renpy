@@ -1,5 +1,6 @@
 #!/bin/bash
-set -x
+#set -x
+trap 'exit' INT TERM EXIT
 
 pushd Kinkoi_extract/ui
 magick _menu_bg.06.png _menu_bg.05.png _menu_bg.04.png _menu_bg.03.png _menu_bg.02.png _menu_bg.01.png _menu_character.01.png _menu_character.03.png _menu_character.04.png _menu_character.02.webp \( -page +0+915 _menu_btn_filter.png \) \( -page +20+720 en/_menu_title_logo.png \) -layers flatten ../../game/gui/main_menu.png
@@ -25,6 +26,7 @@ if [[ ! -d Kinkoi_processed/evcg/diff ]]; then
 fi
 
 pushd Kinkoi_processed/evcg
+#mogrify -resize 50% *.webp diff/*.webp
 
 # orohora
 magic ri11 101 201
@@ -36,8 +38,6 @@ magic ak02 101 102
 magic ak02 101 103
 magic ak02 101 104
 magic ak02 101 105
-
-magic ak02 101 201
 
 magic ak02 401 403
 magic ak02 401 404
@@ -192,7 +192,6 @@ magic sy03 101 102
 magic sy03 101 103
 magic sy03 101 104
 magic sy03 201 202
-magic sy03 201 203
 magic sy03 201 204
 magic sy03 301 302
 magic sy03 301 305
@@ -205,7 +204,6 @@ magic sy04 101 105
 magic sy04 101 201
 magic sy04 101 202
 magic sy04 101 203
-magic sy04 101 204
 magic sy04 101 205
 
 magic sy05 101 102

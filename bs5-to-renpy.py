@@ -13,7 +13,7 @@ else:
 debug = 1
 scene = ''
 scenetoggle = 1
-res = [1920, 1080]
+res = [1920,1080]
 inputname = os.path.splitext(os.path.basename(inputFile))[0]
 outputFile = inputname+".rpy"
 sprite_q = [{'b':'','f':'','char':'','char_next':'','x':0.5,'y':0.5,'order':1},
@@ -72,23 +72,21 @@ with open(inputFile, 'r+') as filedata:
         # background music
         if i.startswith('bgm0'):
             newline = i.split()
-            bgm = newline[1]
+            bgm_file = "audio/bgm/"+newline[1]+".ogg"
             time = 0
             print(newline)
 
             for j in newline:
                 if 'TIME:' in j:
                     newline2 = j.split(':')
-                    print(newline2)
                     time = int(newline2[1])/1000
 
-            if 'fadeout' in bgm:
+            if 'fadeout' in bgm_file:
                 bgm = "    stop music fadeout "+str(time)+"\n"
-            elif 'stop' in bgm:
+            elif 'stop' in bgm_file:
                 bgm = "    stop music\n"
             else:
-                bgmfile = "audio/bgm/"+bgm+".ogg"
-                bgm = "    play music \""+bgmfile+"\"\n"
+                bgm = "    play music \""+bgm_file+"\"\n"
 
             #with open(bgmfilelist, 'a') as f:
             #    f.write(bgmfile+"\n")
@@ -96,9 +94,9 @@ with open(inputFile, 'r+') as filedata:
             with open(outputFile, 'a') as f:
                 f.write(bgm)
 
-        elif i.startswith('@SoundStopAll'):
+        elif 'SoundStopAll' in i:
             newline = i.split()
-            time = newline[1]
+            time = int(newline[1])/1000
 
             with open(outputFile, 'a') as f:
                 f.write("    stop music fadeout "+str(time)+"\n")
@@ -111,7 +109,7 @@ with open(inputFile, 'r+') as filedata:
                 f.write("    pause "+str(wait)+"\n")
 
         # disablewindow -> scenetoggle
-        elif i.startswith('@DisableWindow'):
+        elif 'DisableWindow' in i:
             scenetoggle = 1
 
         # jump to label
@@ -205,12 +203,12 @@ with open(inputFile, 'r+') as filedata:
             zooy2 = res[1]/zoom2
 
             if zoom > 1:
-                xpos = ((res[0]-(res[0]/zoom))/2)-xpos
-                ypos = ((res[1]-(res[1]/zoom))/2)-ypos
+                xpos = ((res[0]-(res[0]/zoom))/2)-(xpos*(res[0]/1920))
+                ypos = ((res[1]-(res[1]/zoom))/2)-(ypos*(res[1]/1080))
 
             if zoom2 > 1:
-                xpan = ((res[0]-(res[0]/zoom))/2)-xpan
-                ypan = ((res[1]-(res[1]/zoom))/2)-ypan
+                xpan = ((res[0]-(res[0]/zoom))/2)-(xpan*(res[0]/1920))
+                ypan = ((res[1]-(res[1]/zoom))/2)-(ypan*(res[1]/1080))
 
             scene += " with Dissolve("+str(time)+"):\n"
             scene += "        size("+str(res[0])+","+str(res[1])+") crop ("+str(xpos)+","+str(ypos)+","+str(zoox)+","+str(zooy)+")"
@@ -331,7 +329,7 @@ with open(inputFile, 'r+') as filedata:
                     newline2 = j.split(':')
                     sprite_q[index]['x'] = newline2[1]
                     if newline2[1].lstrip("-").isdigit():
-                        spritex = (res[0]/4)+(res[0]/24)
+                        spritex = (res[0]/4)+(res[0]/12)
                         sprite_q[index]['x'] = ((spritex/2)+int(newline2[1]))/spritex
                     else:
                         sprite_q[index]['x'] = 0.5

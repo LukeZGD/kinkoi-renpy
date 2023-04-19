@@ -249,14 +249,15 @@ screen quick_menu():
             xalign 0.5
             yalign 1.0
 
-            textbutton _("Back") action Rollback()
-            textbutton _("History") action ShowMenu('history')
-            textbutton _("Skip") action Skip() alternate Skip(fast=True, confirm=True)
-            textbutton _("Auto") action Preference("auto-forward", "toggle")
-            textbutton _("Save") action ShowMenu('save')
-            textbutton _("Q.Save") action QuickSave()
-            textbutton _("Q.Load") action QuickLoad()
-            textbutton _("Prefs") action ShowMenu('preferences')
+            textbutton _("Q.SAVE") action QuickSave()
+            textbutton _("Q.LOAD") action QuickLoad()
+            textbutton _("SAVE") action ShowMenu('save')
+            textbutton _("LOAD") action ShowMenu('load')
+            textbutton _("LOG") action ShowMenu('history')
+            textbutton _("SKIP") action Skip() alternate Skip(fast=True, confirm=True)
+            textbutton _("AUTO") action Preference("auto-forward", "toggle")
+            textbutton _("BACK") action Rollback()
+            textbutton _("CONFIG") action ShowMenu('preferences')
 
 
 ## This code ensures that the quick_menu screen is displayed in-game, whenever
@@ -303,13 +304,13 @@ screen navigation():
 
         else:
 
-            textbutton _("History") action ShowMenu("history")
+            textbutton _("Backlog") action ShowMenu("history")
 
             textbutton _("Save") action ShowMenu("save")
 
         textbutton _("Load") action ShowMenu("load")
 
-        textbutton _("Preferences") action ShowMenu("preferences")
+        textbutton _("Config") action ShowMenu("preferences")
 
         if _in_replay:
 
@@ -317,7 +318,7 @@ screen navigation():
 
         elif not main_menu:
 
-            textbutton _("Main Menu") action MainMenu()
+            textbutton _("Title") action MainMenu()
 
         textbutton _("About") action ShowMenu("about")
 
@@ -330,7 +331,7 @@ screen navigation():
 
             ## The quit button is banned on iOS and unnecessary on Android and
             ## Web.
-            textbutton _("Quit") action Quit(confirm=not main_menu)
+            textbutton _("Quit") action Quit(confirm=True)
 
 
 style navigation_button is gui_button
@@ -365,17 +366,17 @@ style navigation2_button_text:
 screen navigation_main():
     hbox:
         style_prefix "navigation2"
-        xpos 180
+        xalign 0.5
         yalign 0.955
         spacing gui.navigation_spacing_main
-        textbutton _("Start") action Start()
-        textbutton _("Load") action ShowMenu("load")
-        textbutton _("Preferences") action ShowMenu("preferences")
-        textbutton _("About") action ShowMenu("about")
-        if renpy.variant("pc") or (renpy.variant("web") and not renpy.variant("mobile")):
-            textbutton _("Help") action ShowMenu("help")
+        textbutton _("PROLOGUE") action Start()
+        textbutton _("LOAD") action ShowMenu("load")
+        textbutton _("CONFIG") action ShowMenu("preferences")
+        #textbutton _("About") action ShowMenu("about")
+        #if renpy.variant("pc") or (renpy.variant("web") and not renpy.variant("mobile")):
+            #textbutton _("Help") action ShowMenu("help")
         if renpy.variant("pc"):
-            textbutton _("Quit") action Quit(confirm=not main_menu)
+            textbutton _("EXIT") action Quit(confirm=True)
 
 
 screen main_menu():
@@ -608,14 +609,14 @@ screen save():
 
     tag menu
 
-    use file_slots(_("Save"))
+    use file_slots(_("SAVE"))
 
 
 screen load():
 
     tag menu
 
-    use file_slots(_("Load"))
+    use file_slots(_("LOAD"))
 
 
 screen file_slots(title):
@@ -737,7 +738,7 @@ screen preferences():
 
     tag menu
 
-    use game_menu(_("Preferences"), scroll="viewport"):
+    use game_menu(_("CONFIG"), scroll="viewport"):
 
         vbox:
 
@@ -904,7 +905,7 @@ screen history():
     ## Avoid predicting this screen, as it can be very large.
     predict False
 
-    use game_menu(_("History"), scroll=("vpgrid" if gui.history_height else "viewport"), yinitial=1.0):
+    use game_menu(_("BACKLOG"), scroll=("vpgrid" if gui.history_height else "viewport"), yinitial=1.0):
 
         style_prefix "history"
 

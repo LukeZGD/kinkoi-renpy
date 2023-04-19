@@ -60,8 +60,8 @@ init python:
     renpy.music.register_channel("voice2", "voice", False)
 
 define config.default_music_volume = 0.5
-define config.default_sfx_volume = 0.7
-define config.default_voice_volume = 0.7
+define config.default_sfx_volume = 0.75
+define config.default_voice_volume = 1
 
 ## Uncomment the following line to set an audio file that will be played while
 ## the player is at the main menu. This file will continue playing into the
