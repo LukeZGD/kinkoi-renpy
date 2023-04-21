@@ -2,20 +2,22 @@
 #set -x
 trap 'exit' INT TERM EXIT
 
+defs="$(tr -d "\r" < Kinkoi_extract/sprite/defs.txt)"
+resize=0 # set to 1 for half size
+
 crop() {
     if [[ -n $3 ]]; then
-        magick convert ${1}1.webp -crop $2 +repage +adjoin -scene $3 crop/$1%02d.webp
+        magick convert ${1}_1.webp -crop $2 +repage +adjoin -scene $3 crop/$1%02d.webp
         return
     fi
-    magick convert ${1}0.webp -crop $2 +repage +adjoin -scene 1 crop/$1%02d.webp
+    magick convert ${1}_0.webp -crop $2 +repage +adjoin -scene 1 crop/$1%02d.webp
 }
 
 sprite() {
     char=$(echo $1 | cut -c 5- | cut -c -2)
     base=$(basename $1)
     base=${base%%.*}
-    face="$(echo $1 | cut -c -8)_face1_"
-    defs="$(tr -d "\r" < defs.txt)"
+    face="$(echo $1 | cut -c -8)_face1"
 
     for i in $defs; do
         #echo $i
@@ -29,22 +31,22 @@ sprite() {
             cropx=${props[5]}
             cropy=${props[6]}
 
-            #if [[ ${props[0]} == "$(echo $1 | cut -c -8)"* ]]; then
-            #    imagest="image $char $base $face = im.Composite(($basex,$basey),(0,0),\"images/sprite/$base.webp\",($facex,$facey),[$face])"
-            #    echo "$imagest" >> defs_sprite.rpy
-            #fi
+            if [[ $resize == 1 ]]; then
+                basex=$((basex/2))
+                basey=$((basey/2))
+                facex=$((facex/2))
+                facey=$((facey/2))
+            fi
 
-            #basex=$((basex/2))
-            #basey=$((basey/2))
-            #facex=$((facex/2))
-            #facey=$((facey/2))
+            if [[ ${props[0]} == "${face}_0" ]]; then
+                imagest="image $char $base $face = LiveComposite(($basex,$basey),(0,0),\"images/sprite/$base.webp\",($facex,$facey),\"images/sprite/crop/${face}_[$face].webp\")"
+                echo "$imagest" >> defs_sprite.rpy
+            fi
 
-            #cropx=$((cropx/2))
-            #cropy=$((cropy/2))
             continue
         fi
 
-        if [[ ${props[0]} != "${face}0" && ${props[0]} != "${face}1" ]]; then
+        if [[ ${props[0]} != "${face}_0" && ${props[0]} != "${face}_1" ]]; then
             continue
         fi
 
@@ -70,8 +72,8 @@ sprite() {
             ;;
         esac
 
-        imagest="image $char $base $i = im.Composite(($basex,$basey),(0,0),\"images/sprite/$base.webp\",($facex,$facey),\"images/sprite/crop/$i.webp\")"
-        echo "$imagest" >> defs_sprite.rpy
+        #imagest="image $char $base $i = im.Composite(($basex,$basey),(0,0),\"images/sprite/$base.webp\",($facex,$facey),\"images/sprite/crop/$i.webp\")"
+        #echo "$imagest" >> defs_sprite.rpy
     done
 }
 
@@ -85,7 +87,7 @@ pushd Kinkoi_processed/sprite
 printf '' > defs_sprite.rpy
 mkdir crop
 
-for i in $(ls *.webp); do
+for i in $(ls b*base*.webp); do
     name=$(basename $i)
     name=${name%%.*}
     if [[ $i != *"base"* ]]; then
@@ -95,6 +97,13 @@ for i in $(ls *.webp); do
     sprite $i
 done
 
-#mogrify -resize 50% *.webp crop/*.webp
+#for i in $(ls bs*_face*0.webp); do
+    #face=$(echo $i | cut -c -14)
+    #echo "default $face = \"gui/namebox.png\"" >> defs_sprite.rpy
+#done
+
+if [[ $resize == 1 ]]; then
+    : mogrify -resize 50% *.webp crop/*.webp
+fi
 mv defs_sprite.rpy ../..
 popd

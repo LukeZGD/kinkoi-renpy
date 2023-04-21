@@ -2,6 +2,7 @@
 #set -x
 trap 'exit' INT TERM EXIT
 
+resize=0 # set to 1 for half size
 pushd Kinkoi_extract/ui
 magick _menu_bg.06.png _menu_bg.05.png _menu_bg.04.png _menu_bg.03.png _menu_bg.02.png _menu_bg.01.png _menu_character.01.png _menu_character.03.png _menu_character.04.png _menu_character.02.webp \( -page +0+915 _menu_btn_filter.png \) \( -page +20+720 en/_menu_title_logo.png \) -layers flatten ../../game/gui/main_menu.png
 popd
@@ -26,7 +27,9 @@ if [[ ! -d Kinkoi_processed/evcg/diff ]]; then
 fi
 
 pushd Kinkoi_processed/evcg
-#mogrify -resize 50% *.webp diff/*.webp
+if [[ $resize == 1 ]]; then
+    mogrify -resize 50% *.webp diff/*.webp
+fi
 
 # orohora
 magic ri11 101 201

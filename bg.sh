@@ -1,6 +1,7 @@
 #!/bin/bash
 
 printf '' > defs_bg.rpy
+resize=0 # set to 1 for half size
 
 bg_process() {
     dir=$1
@@ -9,9 +10,11 @@ bg_process() {
     mkdir Kinkoi_processed/$dir
     if [[ $dir != "evcg" ]]; then
         cp Kinkoi_extract/$dir/*.$ext Kinkoi_processed/$dir
-        #pushd Kinkoi_processed/$dir
-        #mogrify -resize 50% *.$ext
-        #popd
+        if [[ $resize == 1 ]]; then
+            pushd Kinkoi_processed/$dir
+            mogrify -resize 50% *.$ext
+            popd
+        fi
     fi
     if [[ $dir == "ui" ]]; then
         return
