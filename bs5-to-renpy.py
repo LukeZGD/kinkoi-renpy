@@ -70,7 +70,7 @@ def sprite_process(sprite, sprite_q, index, time):
     sprite_q[index]['char_next'] = sprite_q[index]['b'][4:-9]
 
     if (sprite_q[index]['char'] != '' and sprite_q[index]['char_next'] != sprite_q[index]['char']):
-        sprite_ret += "    hide "+sprite_q[(index)]['char']+" with Dissolve("+str(time)+")\n"
+        sprite_ret += "    hide "+sprite_q[(index)]['char']+"\n"
 
     sprite_q[index]['char'] = sprite_q[index]['char_next']
     sprite_ret += "    show "+sprite_q[index]['char']+' '+sprite_q[index]['b']+' '+sprite_q[index]['f'][:14]
@@ -87,69 +87,8 @@ with open(inputFile, 'r+') as filedata:
             with open(outputFile, 'a') as f:
                 f.write("    with Dissolve("+str(spritetime)+")\n")
 
-        # background music
-        if i.startswith('bgm0'):
-            newline = i.split()
-            bgm_file = "audio/bgm/"+newline[1]+".ogg"
-            time = 0
-            print(newline)
-
-            for j in newline:
-                if 'TIME:' in j:
-                    newline2 = j.split(':')
-                    time = int(newline2[1])/1000
-
-            if 'fadeout' in bgm_file or 'stop' in bgm_file:
-                bgm = "    stop music fadeout "+str(time)+"\n"
-            else:
-                bgm = "    play music \""+bgm_file+"\"\n"
-
-            #with open(bgmfilelist, 'a') as f:
-            #    f.write(bgmfile+"\n")
-
-            with open(outputFile, 'a') as f:
-                f.write(bgm)
-
-        elif 'SoundStopAll' in i:
-            newline = i.split()
-            time = int(newline[1])/1000
-
-            with open(outputFile, 'a') as f:
-                f.write("    stop music fadeout "+str(time)+"\n")
-
-        # wait -> pause in renpy
-        elif i.startswith('wait'):
-            newline = i.split()
-            wait = int(newline[1])/1000
-            with open(outputFile, 'a') as f:
-                f.write("    pause "+str(wait)+"\n")
-
-        # disablewindow -> scenetoggle
-        elif 'DisableWindow' in i:
-            scenetoggle = 1
-
-        # jump to label
-        elif i.startswith('jump'):
-            newline = i.split()
-            jump = "jump s"+inputname+"_"+newline[1].replace(':','')+"\n"
-            print(jump)
-            #input()
-            with open(outputFile, 'a') as f:
-                f.write('    '+jump)
-
-        # labels
-        elif ':\n' in i:
-            label = ''
-            if not 'Z00' in i:
-                label += '    return\n'
-            label += "label s"+inputname+"_"+i
-            print(label)
-            #input()
-            with open(outputFile, 'a') as f:
-                f.write(label)
-
         # backgrounds and cgs
-        elif i.startswith('.scene') or i.startswith('scene'):
+        if i.startswith('.scene') or i.startswith('scene'):
             newline = i.split()
             scenep = scene_conv(newline[1])
             if scenetoggle == 1:
@@ -237,6 +176,137 @@ with open(inputFile, 'r+') as filedata:
             with open(outputFile, 'a') as f:
                 f.write(scene+"\n")
 
+        # sprites
+        elif '.sprite' in i:
+            newline = i.split()
+            spritetime = 0.2
+            sprite = ''
+            spriteerase = 0
+            spritemove = 0
+            spritetran = 1
+            if i.startswith('.sprite'):
+                index = int(i[7])
+            elif i.startswith('sprite'):
+                index = int(i[6])
+            else:
+                continue
+            print(newline)
+            #input()
+
+            if index >= 5:
+                continue
+
+            for j in newline:
+                if j.startswith('bs') or j.startswith('f_bs') or j.startswith('+'):
+                    sprite = j
+                elif j.startswith('TIME:'):
+                    newline2 = j.split(':')
+                    print(newline2)
+                    spritetime = int(newline2[1])/1000
+
+                elif j.startswith('X:'):
+                    newline2 = j.split(':')
+                    sprite_q[index]['x'] = newline2[1]
+                    if newline2[1].lstrip("-").isdigit():
+                        if res[0] == 960:
+                            spritex = (res[0]/4)+(res[0]/3)
+                        else:
+                            spritex = (res[0]/4)+(res[0]/12)
+                        sprite_q[index]['x'] = ((spritex/2)+int(newline2[1]))/spritex
+                    else:
+                        sprite_q[index]['x'] = 0.5
+
+                elif j.startswith('Y:'):
+                    newline2 = j.split(':')
+                    sprite_q[index]['y'] = newline2[1]
+                    if newline2[1].lstrip("-").isdigit():
+                        sprite_q[index]['y'] = int(newline2[1])+100
+                    else:
+                        sprite_q[index]['y'] = 0.5
+
+                elif j.startswith('ORDER:'):
+                    newline2 = j.split(':')
+                    sprite_q[index]['order'] = int(newline2[1])/10
+                elif j.startswith('erase'):
+                    spriteerase = 1
+
+            if spriteerase == 1:
+                sprite = "    hide "+str(sprite_q[index]['char'])
+                sprite_q[index]['char'] = ''
+
+            else:
+                sprite = sprite.split('+')
+                sprite = sprite_process(sprite, sprite_q, index, spritetime)
+                sprite += " zorder "+str(sprite_q[index]['order'])+":\n"
+                if spritemove == 1:
+                    sprite += "        easein "+str(spritetime)+" xalign "+str(sprite_q[index]['x'])+" yalign 0.5"
+                else:
+                    sprite += "        xalign "+str(sprite_q[index]['x'])+" yalign 0.5"
+
+            with open(outputFile, 'a') as f:
+                f.write(sprite+"\n")
+
+        # background music
+        elif i.startswith('bgm0'):
+            newline = i.split()
+            bgm_file = "audio/bgm/"+newline[1]+".ogg"
+            time = 0
+            print(newline)
+
+            for j in newline:
+                if 'TIME:' in j:
+                    newline2 = j.split(':')
+                    time = int(newline2[1])/1000
+
+            if 'fadeout' in bgm_file or 'stop' in bgm_file:
+                bgm = "    stop music fadeout "+str(time)+"\n"
+            else:
+                bgm = "    play music \""+bgm_file+"\"\n"
+
+            #with open(bgmfilelist, 'a') as f:
+            #    f.write(bgmfile+"\n")
+
+            with open(outputFile, 'a') as f:
+                f.write(bgm)
+
+        elif 'SoundStopAll' in i:
+            newline = i.split()
+            time = int(newline[1])/1000
+
+            with open(outputFile, 'a') as f:
+                f.write("    stop music fadeout "+str(time)+"\n")
+
+        # wait -> pause in renpy
+        elif i.startswith('wait'):
+            newline = i.split()
+            wait = int(newline[1])/1000
+            with open(outputFile, 'a') as f:
+                f.write("    pause "+str(wait)+"\n")
+
+        # disablewindow -> scenetoggle
+        elif 'DisableWindow' in i:
+            scenetoggle = 1
+
+        # jump to label
+        elif i.startswith('jump'):
+            newline = i.split()
+            jump = "jump s"+inputname+"_"+newline[1].replace(':','')+"\n"
+            print(jump)
+            #input()
+            with open(outputFile, 'a') as f:
+                f.write('    '+jump)
+
+        # labels
+        elif ':\n' in i:
+            label = ''
+            if not 'Z00' in i:
+                label += '    return\n'
+            label += "label s"+inputname+"_"+i
+            print(label)
+            #input()
+            with open(outputFile, 'a') as f:
+                f.write(label)
+
         # screen shake
         elif i.startswith('quake'):
             if not scenep:
@@ -315,76 +385,6 @@ with open(inputFile, 'r+') as filedata:
         # choices
         elif i.startswith('␅select'):
             print('choice')
-
-        # sprites
-        elif '.sprite' in i:
-            newline = i.split()
-            spritetime = 0.2
-            sprite = ''
-            spriteerase = 0
-            spritemove = 0
-            spritetran = 1
-            if i.startswith('.sprite'):
-                index = int(i[7])
-            elif i.startswith('sprite'):
-                index = int(i[6])
-            else:
-                continue
-            print(newline)
-            #input()
-
-            if index >= 5:
-                continue
-
-            for j in newline:
-                if j.startswith('bs') or j.startswith('f_bs') or j.startswith('+'):
-                    sprite = j
-                elif j.startswith('TIME:'):
-                    newline2 = j.split(':')
-                    print(newline2)
-                    spritetime = int(newline2[1])/1000
-
-                elif j.startswith('X:'):
-                    newline2 = j.split(':')
-                    sprite_q[index]['x'] = newline2[1]
-                    if newline2[1].lstrip("-").isdigit():
-                        if res[0] == 960:
-                            spritex = (res[0]/4)+(res[0]/3)
-                        else:
-                            spritex = (res[0]/4)+(res[0]/12)
-                        sprite_q[index]['x'] = ((spritex/2)+int(newline2[1]))/spritex
-                    else:
-                        sprite_q[index]['x'] = 0.5
-
-                elif j.startswith('Y:'):
-                    newline2 = j.split(':')
-                    sprite_q[index]['y'] = newline2[1]
-                    if newline2[1].lstrip("-").isdigit():
-                        sprite_q[index]['y'] = int(newline2[1])+100
-                    else:
-                        sprite_q[index]['y'] = 0.5
-
-                elif j.startswith('ORDER:'):
-                    newline2 = j.split(':')
-                    sprite_q[index]['order'] = int(newline2[1])/10
-                elif j.startswith('erase'):
-                    spriteerase = 1
-
-            if spriteerase == 1:
-                sprite = "    hide "+str(sprite_q[index]['char'])
-                sprite_q[index]['char'] = ''
-
-            else:
-                sprite = sprite.split('+')
-                sprite = sprite_process(sprite, sprite_q, index, spritetime)
-                sprite += " zorder "+str(sprite_q[index]['order'])+":\n"
-                if spritemove == 1:
-                    sprite += "        easein "+str(spritetime)+" xalign "+str(sprite_q[index]['x'])+" yalign 0.5"
-                else:
-                    sprite += "        xalign "+str(sprite_q[index]['x'])+" yalign 0.5"
-
-            with open(outputFile, 'a') as f:
-                f.write(sprite+"\n")
 
         else:
             pass
