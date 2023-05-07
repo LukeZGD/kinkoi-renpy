@@ -3,15 +3,27 @@
 printf '' > defs_bg.rpy
 resize=0 # set to 1 for half size
 
+if [[ -z $1 ]]; then
+    echo "Usage: ./bg.sh [Aokana|AokanaEXTRA1|Kinkoi]"
+    exit 1
+fi
+
+game="$1"
+
+if [[ ! -d ${game}_Data ]]; then
+    echo "${game}_Data folder not found"
+    exit 1
+fi
+
 bg_process() {
     dir=$1
     ext=$2
 
-    mkdir Kinkoi_processed/$dir
+    mkdir -p ${game}_processed/$dir
     if [[ $dir != "evcg" ]]; then
-        cp Kinkoi_extract/$dir/*.$ext Kinkoi_processed/$dir
+        cp ${game}_extract/$dir/*.$ext ${game}_processed/$dir
         if [[ $resize == 1 ]]; then
-            pushd Kinkoi_processed/$dir
+            pushd ${game}_processed/$dir
             mogrify -resize 50% *.$ext
             popd
         fi
@@ -19,7 +31,7 @@ bg_process() {
     if [[ $dir == "ui" ]]; then
         return
     fi
-    for i in $(ls Kinkoi_processed/$dir/*.$ext); do
+    for i in $(ls ${game}_processed/$dir/*.$ext); do
         name=$(basename $i)
         name=${name%%.*}
         echo "image bg $name = \"images/$dir/$name.$ext\"" >> defs_bg.rpy
@@ -28,8 +40,11 @@ bg_process() {
 
 bg_process bg webp
 bg_process effects png
-bg_process effects webp
-bg_process effects2 png
-bg_process effects2 webp
 bg_process evcg webp
-bg_process ui png
+
+if [[ $game == "Kinkoi" ]]; then
+    bg_process effects webp
+    bg_process effects2 png
+    bg_process effects2 webp
+    bg_process ui png
+fi

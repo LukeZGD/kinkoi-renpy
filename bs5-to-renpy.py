@@ -12,6 +12,7 @@ else:
     print("example: python3 bs5-to-renpy.py inputfile")
     exit()
 
+game = "aokana"
 debug = 1
 scene = ''
 scenetoggle = 1
@@ -19,10 +20,10 @@ res = [1920,1080] # set to 960,540 for half size
 inputname = os.path.splitext(os.path.basename(inputFile))[0]
 outputFile = inputname+".rpy"
 sprite_q = [{'b':'','f':'','char':'','char_next':'','x':0.5,'y':0.5,'order':1},
-           {'b':'','f':'','char':'','char_next':'','x':0.5,'y':0.5,'order':1},
-           {'b':'','f':'','char':'','char_next':'','x':0.5,'y':0.5,'order':1},
-           {'b':'','f':'','char':'','char_next':'','x':0.5,'y':0.5,'order':1},
-           {'b':'','f':'','char':'','char_next':'','x':0.5,'y':0.5,'order':1},
+            {'b':'','f':'','char':'','char_next':'','x':0.5,'y':0.5,'order':1},
+            {'b':'','f':'','char':'','char_next':'','x':0.5,'y':0.5,'order':1},
+            {'b':'','f':'','char':'','char_next':'','x':0.5,'y':0.5,'order':1},
+            {'b':'','f':'','char':'','char_next':'','x':0.5,'y':0.5,'order':1},
            ]
 spritetran = 0
 spritemove = 0
@@ -60,6 +61,7 @@ def sprite_process(sprite, sprite_q, index, time):
 
     #print('yes')
     print(sprite_q[index]['f'])
+    print(index)
     #input()
 
     if (sprite_q[index]['f_next'] != sprite_q[index]['f']):
@@ -81,6 +83,9 @@ with open(inputFile, 'r+') as filedata:
     for i in filedata:
         if debug == 1:
             print("processing line:", i)
+
+        if '//' in i:
+            continue
 
         if spritetran == 1 and not '.sprite' in i:
             spritetran = 0
@@ -177,21 +182,26 @@ with open(inputFile, 'r+') as filedata:
                 f.write(scene+"\n")
 
         # sprites
-        elif '.sprite' in i:
+        elif '.sprite' in i or '.bustshot' in i:
             newline = i.split()
             spritetime = 0.2
             sprite = ''
             spriteerase = 0
             spritemove = 0
             spritetran = 1
-            if i.startswith('.sprite'):
-                index = int(i[7])
-            elif i.startswith('sprite'):
+            if i.startswith('sprite'):
                 index = int(i[6])
+            elif i.startswith('.sprite'):
+                index = int(i[7])
+            elif i.startswith('bustshot'):
+                index = int(i[8])
+            elif i.startswith('.bustshot'):
+                index = int(i[9])
             else:
                 continue
             print(newline)
-            #input()
+            print(index)
+            input()
 
             if index >= 5:
                 continue
@@ -279,7 +289,8 @@ with open(inputFile, 'r+') as filedata:
         # wait -> pause in renpy
         elif i.startswith('wait'):
             newline = i.split()
-            wait = int(newline[1])/1000
+            wait = newline[1].replace('TIME:', '')
+            wait = int(wait)/1000
             with open(outputFile, 'a') as f:
                 f.write("    pause "+str(wait)+"\n")
 
@@ -314,13 +325,13 @@ with open(inputFile, 'r+') as filedata:
 
         # whiteout background
         elif i.startswith('@WhiteoutBySA'):
-            newline = i.split()
-            time = newline[1]
+            newline = i.split(',')
+            time = newline[0].split()[1]
             time = int(time[:-1])/1000
             scene = "    scene white with Dissolve("+str(time)+")\n"
 
             with open(outputFile, 'a') as f:
-                if newline[2] != "false":
+                if not "false" in newline[1]:
                     f.write(scene)
 
         # voices
@@ -331,7 +342,10 @@ with open(inputFile, 'r+') as filedata:
             if 'stop' in voice:
                 continue
 
-            voicefile = "audio/voice/z"+voice+".ogg"
+            voicefile = "audio/voice/"
+            if game == 'kinkoi':
+                voicefile += "z"
+            voicefile += voice+".ogg"
 
             #with open(voicefilelist, 'a') as f:
             #    f.write(voicefile+"\n")
@@ -348,7 +362,7 @@ with open(inputFile, 'r+') as filedata:
             newline = i.split()
             sfx = newline[1]
 
-            if 'fadeout' in sfx or 'stop' in sfx:
+            if 'fadeout' in sfx or 'stop' in sfx or 'wait' in sfx:
                 continue
 
             sfxfile = "audio/sfx/"+sfx+".ogg"
