@@ -5,6 +5,7 @@
 *.webm
 cache/
 Kinkoi_*
+Aokana_*
 saves/
 00_prologue*.rpy
 defs*.rpy

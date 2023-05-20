@@ -182,13 +182,14 @@ with open(inputFile, 'r+') as filedata:
                 f.write(scene+"\n")
 
         # sprites
-        elif '.sprite' in i or '.bustshot' in i:
+        elif '.sprite' in i:
             newline = i.split()
             spritetime = 0.2
             sprite = ''
             spriteerase = 0
             spritemove = 0
             spritetran = 1
+
             if i.startswith('sprite'):
                 index = int(i[6])
             elif i.startswith('.sprite'):
@@ -201,7 +202,6 @@ with open(inputFile, 'r+') as filedata:
                 continue
             print(newline)
             print(index)
-            input()
 
             if index >= 5:
                 continue
@@ -310,7 +310,7 @@ with open(inputFile, 'r+') as filedata:
         # labels
         elif ':\n' in i:
             label = ''
-            if not 'Z00' in i:
+            if not 'Z00' in i and not '_start' in i:
                 label += '    return\n'
             label += "label s"+inputname+"_"+i
             print(label)
@@ -327,7 +327,7 @@ with open(inputFile, 'r+') as filedata:
         elif i.startswith('@WhiteoutBySA'):
             newline = i.split(',')
             time = newline[0].split()[1]
-            time = int(time[:-1])/1000
+            time = int(time)/1000
             scene = "    scene white with Dissolve("+str(time)+")\n"
 
             with open(outputFile, 'a') as f:
